@@ -38,9 +38,27 @@ npm run build
 | 변수 | 필수 | 설명 |
 |------|------|------|
 | `COROS_EMAIL` | ✅ | COROS 계정 이메일 |
-| `COROS_PASSWORD` | ✅ | COROS 계정 비밀번호 |
+| `COROS_PASSWORD` | ✅* | COROS 계정 비밀번호 (평문) |
+| `COROS_PASSWORD_MD5` | ✅* | 비밀번호의 MD5 해시(32자리 hex). 설정 시 `COROS_PASSWORD`보다 우선하며, **평문 비밀번호를 어디에도 저장하지 않아도 됩니다** |
 | `COROS_REGION` | | `global`(기본) / `eu` / `cn` |
 | `COROS_API_BASE` | | API 베이스 URL 직접 지정 (REGION보다 우선) |
+
+\* 둘 중 하나만 설정하면 됩니다. 보안상 `COROS_PASSWORD_MD5` 권장.
+
+### MD5 해시 만들기
+
+COROS API는 로그인 시 비밀번호를 MD5 해시로 전송하므로, 해시만 있으면 로그인할 수 있습니다. 본인 PC에서:
+
+```bash
+# macOS
+md5 -s '비밀번호'
+# Linux
+echo -n '비밀번호' | md5sum
+# Windows PowerShell
+[BitConverter]::ToString([Security.Cryptography.MD5]::Create().ComputeHash([Text.Encoding]::UTF8.GetBytes('비밀번호'))).Replace('-','').ToLower()
+```
+
+> 참고: 이 해시로도 COROS API 로그인은 가능하므로 비밀번호만큼은 아니어도 여전히 민감 정보입니다. 다만 평문이 노출되지 않으므로, 같은 비밀번호를 다른 서비스에서도 쓰는 경우 피해 범위를 COROS 계정으로 한정할 수 있습니다.
 
 ## Claude에 연결하기
 

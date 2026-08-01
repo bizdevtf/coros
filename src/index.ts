@@ -8,8 +8,10 @@
  * training.coros.com web app talks to.
  *
  * Required environment variables:
- *   COROS_EMAIL     - COROS account email
- *   COROS_PASSWORD  - COROS account password
+ *   COROS_EMAIL         - COROS account email
+ *   COROS_PASSWORD      - COROS account password (plaintext), OR
+ *   COROS_PASSWORD_MD5  - 32-char MD5 hex digest of the password (preferred:
+ *                         the plaintext never needs to be shared or stored)
  * Optional:
  *   COROS_REGION    - 'global' (default), 'eu', or 'cn'
  *   COROS_API_BASE  - full base URL override (takes precedence over region)
@@ -38,16 +40,22 @@ function resolveBaseUrl(): string {
 
 async function main(): Promise<void> {
   const email = process.env.COROS_EMAIL;
-  const password = process.env.COROS_PASSWORD;
+  const passwordMd5 = process.env.COROS_PASSWORD_MD5;
+  const password = passwordMd5 ?? process.env.COROS_PASSWORD;
   if (!email || !password) {
     console.error(
-      "ERROR: COROS_EMAIL and COROS_PASSWORD environment variables are required.\n" +
+      "ERROR: COROS_EMAIL and either COROS_PASSWORD or COROS_PASSWORD_MD5 " +
+        "environment variables are required.\n" +
         "Optionally set COROS_REGION (global|eu|cn) or COROS_API_BASE.",
     );
     process.exit(1);
   }
+  if (passwordMd5 && !/^[0-9a-fA-F]{32}$/.test(passwordMd5)) {
+    console.error("ERROR: COROS_PASSWORD_MD5 must be a 32-character hex MD5 digest.");
+    process.exit(1);
+  }
 
-  const client = new CorosClient(email, password, resolveBaseUrl());
+  const client = new CorosClient(email, password, resolveBaseUrl(), Boolean(passwordMd5));
 
   const server = new McpServer({
     name: "coros-mcp-server",

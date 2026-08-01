@@ -36,10 +36,16 @@ export class CorosClient {
   private token: string | null = null;
   private readonly baseUrl: string;
 
+  /**
+   * @param password  Plaintext password, or a pre-computed 32-char MD5 hex
+   *                  digest when `passwordIsMd5` is true — so the plaintext
+   *                  never has to be shared or stored.
+   */
   constructor(
     private readonly email: string,
     private readonly password: string,
     baseUrl?: string,
+    private readonly passwordIsMd5 = false,
   ) {
     this.baseUrl = (baseUrl ?? REGION_BASE_URLS.global).replace(/\/+$/, "");
   }
@@ -95,7 +101,9 @@ export class CorosClient {
   }
 
   async login(): Promise<void> {
-    const pwd = createHash("md5").update(this.password).digest("hex");
+    const pwd = this.passwordIsMd5
+      ? this.password.toLowerCase()
+      : createHash("md5").update(this.password).digest("hex");
     const envelope = await this.httpJson(
       "POST",
       "/account/login",
