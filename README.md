@@ -15,6 +15,7 @@ COROS 트레이닝 허브(Training Hub) 데이터를 MCP(Model Context Protocol)
 | `coros_download_activity` | 활동 파일(FIT/TCX/GPX/KML/CSV) 다운로드 URL 발급 |
 | `coros_get_profile` | 계정 프로필 조회 — 심박존, 신체 정보 등 |
 | `coros_api_request` | 임의의 COROS API 엔드포인트 호출 (수면·일일 데이터 등 탐색용) |
+| `body_load_measurements` | 스마트 체중계(앳플리 등) 체성분 CSV 로드 — 훈련 데이터와 교차 분석용 |
 
 ### AI 분석 프롬프트 (Prompts)
 
@@ -23,6 +24,7 @@ COROS 트레이닝 허브(Training Hub) 데이터를 MCP(Model Context Protocol)
 | `coros_training_analysis` | 최근 N주 훈련량·강도 분포·과훈련 위험 종합 분석 + 다음 주 계획 제안 |
 | `coros_weekly_report` | 이번 주/지난 주 훈련 주간 리포트 |
 | `coros_race_readiness` | 목표 대회 준비도 평가 + 테이퍼링 전략 |
+| `coros_body_training_analysis` | 체성분(체중계 CSV) × 훈련 데이터 교차 분석 |
 
 ## 설치
 
@@ -106,6 +108,18 @@ npm run dev        # tsx watch 모드
 npm run build      # dist/ 빌드
 npx @modelcontextprotocol/inspector node dist/index.js   # MCP Inspector로 테스트
 ```
+
+## 스마트 체중계(앳플리 등) 데이터 연결
+
+앳플리(atFlee)를 비롯한 대부분의 스마트 체중계는 공개 API가 없으므로 **CSV 내보내기 → 파일 로드** 방식으로 연결합니다:
+
+1. 데이터 내보내기 (아래 중 가능한 경로 사용):
+   - 앳플리 앱의 데이터 내보내기/공유 기능
+   - 삼성헬스 → 설정 → 개인 데이터 다운로드 (weight CSV 포함)
+   - 직접 기록한 엑셀/CSV (날짜 + 체중 등의 열만 있으면 됨)
+2. Claude에게 파일 경로와 함께 요청: "이 체중 데이터랑 내 훈련 데이터 교차 분석해줘" (또는 `coros_body_training_analysis` 프롬프트 사용)
+
+`body_load_measurements` 도구가 한국어/영어 열 이름을 자동 인식합니다 (체중/weight, 체지방률/body_fat, 골격근량/skeletal_muscle, BMI, 체수분, 내장지방, 기초대사량 등). 삼성헬스 내보내기 파일의 메타데이터 줄도 자동으로 건너뜁니다.
 
 ## 주의사항
 

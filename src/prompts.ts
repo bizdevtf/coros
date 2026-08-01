@@ -84,6 +84,44 @@ ${week === "last" ? "지난 주" : "이번 주"} COROS 훈련 주간 리포트�
   );
 
   server.registerPrompt(
+    "coros_body_training_analysis",
+    {
+      title: "체성분 × 훈련 교차 분석",
+      description:
+        "스마트 체중계(앳플리 등) CSV 데이터와 COROS 훈련 데이터를 함께 분석해 체중·체지방 변화와 훈련의 관계를 평가합니다.",
+      argsSchema: {
+        csv_path: z.string().describe("체성분 CSV 파일의 절대 경로"),
+        weeks: z.string().optional().describe("분석 기간(주 단위, 기본 8)"),
+      },
+    },
+    ({ csv_path, weeks }) => ({
+      messages: [
+        {
+          role: "user" as const,
+          content: {
+            type: "text" as const,
+            text: `${COACH_ROLE}
+
+체중계 데이터와 훈련 데이터를 교차 분석해 주세요. 분석 기간: 최근 ${weeks ?? "8"}주.
+
+1. body_load_measurements로 체성분 데이터 로드 (file_path: ${csv_path})
+2. coros_list_activities로 같은 기간 훈련 데이터 조회 (여러 페이지 필요 시 모두)
+3. 주 단위로 정렬: 주별 훈련량(거리/시간/칼로리) vs 주 평균 체중·체지방률·골격근량
+
+분석할 내용:
+- 체중/체지방 추세와 훈련량의 상관관계 (훈련이 많았던 주에 실제 변화가 있었는지)
+- 골격근량이 유지/증가되고 있는지 (감량 중 근손실 여부)
+- 급격한 체중 변동이 훈련 성과(페이스, 심박)에 미친 영향
+- 목표에 맞는 조언: 감량 페이스가 적절한지, 훈련·영양 측면 제안 3가지
+
+한국어로, 표와 함께 작성해 주세요.`,
+          },
+        },
+      ],
+    }),
+  );
+
+  server.registerPrompt(
     "coros_race_readiness",
     {
       title: "COROS 대회 준비도 평가",

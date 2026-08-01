@@ -23,6 +23,7 @@ import { REGION_BASE_URLS } from "./constants.js";
 import { CorosClient } from "./services/client.js";
 import { registerActivityTools } from "./tools/activities.js";
 import { registerAccountTools } from "./tools/account.js";
+import { registerBodyTools } from "./tools/body.js";
 import { registerPrompts } from "./prompts.js";
 
 function resolveBaseUrl(): string {
@@ -64,6 +65,7 @@ async function main(): Promise<void> {
 
   registerActivityTools(server, client);
   registerAccountTools(server, client);
+  registerBodyTools(server);
   registerPrompts(server);
 
   const transport = new StdioServerTransport();
