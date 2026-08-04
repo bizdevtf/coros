@@ -138,8 +138,9 @@ Returns the raw detail JSON from the COROS API (structure varies by sport). Larg
     },
     async (params) => {
       try {
+        // The API rejects these as a JSON body (result=1001); it expects query params.
         const data = await client.request("POST", "/activity/detail/query", {
-          body: { labelId: params.label_id, sportType: params.sport_type },
+          query: { labelId: params.label_id, sportType: params.sport_type },
         });
         const text = JSON.stringify(data, null, 2);
         return {
